@@ -37,8 +37,10 @@ void Servo_LightScan() {
     max_measurement = light;
     opt_pos = servo_pos;
   }  
+
   
   delay(15);}
+}
 
 void Go_To_Opt_Pos() {
  servo1.write(opt_pos); //servo moves to optimal position
