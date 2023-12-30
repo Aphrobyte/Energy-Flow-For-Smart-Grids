@@ -11,6 +11,8 @@ const int button1=3;
 bool scan_set;
 
 bool pos_button;        //instructs the circuit to go to optimal position
+bool pos_button_ack;
+bool pos_set; 
 const int button2=4;    
 
 void setup()
@@ -25,12 +27,12 @@ void Servo_LightScan() {
   {    
     servo1.write(servo_pos);
     light= analogRead(photoPin);           
-    delay(100);   
+    //delay(15);   
 
     Serial.println("Current position: ");
     Serial.println(servo_pos);
 
-    Serial.println("Current light: ");
+    Serial.println("Current light: ");    
     Serial.println(light);  
   
    if (light>max_measurement) {
@@ -38,7 +40,7 @@ void Servo_LightScan() {
     opt_pos = servo_pos; //assignment of maximum light measurement and optimal position values during servo motion
    }  
   
-  delay(100);
+  delay(15);
   }
 }
 
@@ -53,27 +55,40 @@ void loop() {
   scan_button=digitalRead(button1);
   pos_button=digitalRead(button2);
 
-  if (scan_button == true) {
+  if ((scan_button == true) && (scan_set == false)) {
     scan_set = true;
+    pos_button = false;
+    pos_set = false;
   } //pushing the button triggers a set of actions
+
+  if ((pos_button == true) && (pos_button_ack == false)){
+    scan_set = false;
+    //pos_button = false;
+    pos_set = true;
+    pos_button_ack = true;
+  } 
+
+if (pos_button == false) {
+   pos_button_ack = false;
+}
+
 
  if (scan_set == true) {
    Servo_LightScan();
-   Serial.println("Optimal Position: ");
-   Serial.println(opt_pos);
-   Serial.println("Maximum light measurement: ");
-   Serial.println(max_measurement);
    scan_set = false; //only allows the Servo_LightScan function to run once
-   scan_button=false;
+  // scan_button=false;
   }
 
- if (pos_button == true) {
-    scan_set = false;
+ if (pos_set == true) {
+    //scan_set = false;
     Go_To_Opt_Pos();
+    Serial.println("Optimal Position: ");
+    Serial.println(opt_pos);
+    Serial.println("Maximum light measurement: ");
+    Serial.println(max_measurement);
+  
+   pos_set = false;
   }
-
- Serial.println(scan_set);
- Serial.println(pos_button);
  
 }
 
