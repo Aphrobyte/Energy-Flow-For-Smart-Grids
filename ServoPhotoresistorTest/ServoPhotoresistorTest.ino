@@ -23,6 +23,7 @@ void setup()
   pinMode(4, INPUT); //button2 is connected to digital pin 4
 }
 void Servo_LightScan() {
+  max_measurement = 0;
   for (servo_pos = 0; servo_pos <= 180; servo_pos += 1) //motor performs 180 degrees movement
   {    
     servo1.write(servo_pos);
