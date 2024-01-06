@@ -1,5 +1,6 @@
 #include <Servo.h>
-Servo servo1;
+Servo servo_pr;         //Photoresistor servo motor
+Servo servo_pc;         //Photovoltaic cell servo motors
 int servo_pos=0;           
 int photoPin= A0;        //analog input of photoresistor measurements
 int light;              //voltage value of photoresistor output
@@ -11,13 +12,14 @@ const int button1=3;
 bool scan_set;
 
 bool pos_button;        //instructs the circuit to go to optimal position
-bool pos_button_ack;
+bool pos_button_ack;   //confirms that pos button is pressed
 bool pos_set; 
 const int button2=4;    
 
 void setup()
 {
-  servo1.attach(9); //servo motor is connected to digital pin 9
+  servo_pr.attach(9); //photoresistor servo motor is connected to digital pin 9
+  servo_pc.attach(10); //photovoltaic cell servo motor is connected to digital pin 10
   Serial.begin(9600);
   pinMode(3, INPUT); //button1 is connected to digital pin 3
   pinMode(4, INPUT); //button2 is connected to digital pin 4
@@ -26,7 +28,7 @@ void Servo_LightScan() {
   max_measurement = 0;
   for (servo_pos = 0; servo_pos <= 180; servo_pos += 1) //motor performs 180 degrees movement
   {    
-    servo1.write(servo_pos);
+    servo_pr.write(servo_pos);
     light= analogRead(photoPin);           
     //delay(15);   
 
@@ -46,7 +48,7 @@ void Servo_LightScan() {
 }
 
 void Go_To_Opt_Pos(){
- servo1.write(opt_pos); //servo moves to optimal position
+ servo_pc.write(opt_pos); //photovoltaic cell servo moves to optimal position
  }
 
 
