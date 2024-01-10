@@ -1,20 +1,22 @@
 #include <Servo.h>
 Servo servo_pr;         //Photoresistor servo motor
 Servo servo_pc;         //Photovoltaic cell servo motors
-int servo_pos=0;           
-int photoPin= A0;        //analog input of photoresistor measurements
+int servo_pos = 0;           
+int photoPin = A0;        //analog input of photoresistor measurements
+int solarCell1 = A1;      //analog input of solar cell measurements
+int solarCell2 = A2;
 int light;              //voltage value of photoresistor output
-int max_measurement= 0; //initial voltage value
-int opt_pos=0;         //position of maximum voltage output
+int max_measurement = 0; //initial voltage value
+int opt_pos = 0;         //position of maximum voltage output
 
 bool scan_button;      //instructs the circuit to perform solar scan    
-const int button1=3;    
+const int button1 = 3;    
 bool scan_set;
 
 bool pos_button;        //instructs the circuit to go to optimal position
 bool pos_button_ack;   //confirms that pos button is pressed
 bool pos_set; 
-const int button2=4;    
+const int button2 = 4;    
 
 void setup()
 {
@@ -66,7 +68,6 @@ void loop() {
 
   if ((pos_button == true) && (pos_button_ack == false)){
     scan_set = false;
-    //pos_button = false;
     pos_set = true;
     pos_button_ack = true;
   } 
@@ -79,11 +80,9 @@ if (pos_button == false) {
  if (scan_set == true) {
    Servo_LightScan();
    scan_set = false; //only allows the Servo_LightScan function to run once
-  // scan_button=false;
   }
 
  if (pos_set == true) {
-    //scan_set = false;
     Go_To_Opt_Pos();
     Serial.println("Optimal Position: ");
     Serial.println(opt_pos);
