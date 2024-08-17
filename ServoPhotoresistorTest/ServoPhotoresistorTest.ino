@@ -22,7 +22,7 @@ bool in_b_Scan_Servo_PhotoResistor; //Instructs the PhotoResistor Servo to perfo
 
 int servo_pos = 0;           
 
-int light;              //voltage value of photoresistor output
+int int_PhotoResistor_Measured;   //Analog input of photoresistor measurements
 int max_measurement = 0; //initial voltage value
 int opt_pos = 0;         //position of maximum voltage output
 
@@ -48,17 +48,17 @@ void Servo_LightScan() {
   for (servo_pos = 0; servo_pos <= 180; servo_pos += 1) //motor performs 180 degrees movement
   {    
     servo_PhotoResistor.write(servo_pos);
-    light= analogRead(in_int_PhotoResistor_Measured);           
+    int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);           
     //delay(15);   
 
     Serial.println("Current position: ");
     Serial.println(servo_pos);
 
     Serial.println("Current light: ");    
-    Serial.println(light);  
+    Serial.println(int_PhotoResistor_Measured);  
   
-   if (light>max_measurement) {
-    max_measurement = light;
+   if (int_PhotoResistor_Measured > max_measurement) {
+    max_measurement = int_PhotoResistor_Measured;
     opt_pos = servo_pos; //assignment of maximum light measurement and optimal position values during servo motion
    }  
   
