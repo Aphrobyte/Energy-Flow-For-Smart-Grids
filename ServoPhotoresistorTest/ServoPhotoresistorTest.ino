@@ -1,6 +1,8 @@
 #include <Servo.h>
 
+/////////////////////////////////////////////
 //Variables Declaration
+////////////////////////////////////////////
 
 //Input variables
 //==========================================================//
@@ -9,9 +11,14 @@ Servo servo_PhotoResistor;     //Photoresistor servo motor
 Servo servo_PhotovoltaicCell;  //Photovoltaic cell servo motors
 
 //Analog Inputs
-int in_photoPin   = A0;       // Analog input of photoresistor measurements
-int in_SolarCell1 = A1;       // Analog input of solar cell measurements
-int in_solarCell2 = A2;       // 
+int in_int_PhotoResistor_Measured   = A0;   // Analog input of photoresistor measurements reading from pin A0
+
+//Boolean Inputs
+bool in_b_Scan_Servo_PhotoResistor; //Instructs the PhotoResistor Servo to perform 180 degrees solar scan  
+
+
+//Internal Variables
+//==========================================================//
 
 int servo_pos = 0;           
 
@@ -19,7 +26,7 @@ int light;              //voltage value of photoresistor output
 int max_measurement = 0; //initial voltage value
 int opt_pos = 0;         //position of maximum voltage output
 
-bool scan_button;      //instructs the circuit to perform solar scan    
+//bool scan_button;      //instructs the circuit to perform solar scan    
 const int button1 = 3;    
 bool scan_set;
 
@@ -41,7 +48,7 @@ void Servo_LightScan() {
   for (servo_pos = 0; servo_pos <= 180; servo_pos += 1) //motor performs 180 degrees movement
   {    
     servo_PhotoResistor.write(servo_pos);
-    light= analogRead(in_photoPin);           
+    light= analogRead(in_int_PhotoResistor_Measured);           
     //delay(15);   
 
     Serial.println("Current position: ");
@@ -67,10 +74,10 @@ void Go_To_Opt_Pos(){
 
 void loop() {
 
-  scan_button=digitalRead(button1);
+  in_b_Scan_Servo_PhotoResistor = digitalRead(button1);
   pos_button=digitalRead(button2);
 
-  if ((scan_button == true) && (scan_set == false)) {
+  if ((in_b_Scan_Servo_PhotoResistor == true) && (scan_set == false)) {
     scan_set = true;
     pos_button = false;
     pos_set = false;
