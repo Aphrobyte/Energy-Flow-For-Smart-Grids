@@ -86,7 +86,7 @@ void loop() {
    
   } //pushing the button triggers a set of actions
 
-  if ((b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
+  if ((in_b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
     b_Scan_Servo_PhotoResistor_Active = false;
     b_Goto_Optimal_Servo_Pos_Active = true;
   } 
@@ -110,4 +110,6 @@ void loop() {
   }
  
 }
+
+
 
