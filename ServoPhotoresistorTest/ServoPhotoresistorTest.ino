@@ -1,10 +1,20 @@
 #include <Servo.h>
-Servo servo_pr;         //Photoresistor servo motor
-Servo servo_pc;         //Photovoltaic cell servo motors
+
+//Variables Declaration
+
+//Input variables
+//==========================================================//
+//Servo Motors
+Servo servo_PhotoResistor;     //Photoresistor servo motor
+Servo servo_PhotovoltaicCell;  //Photovoltaic cell servo motors
+
+//Analog Inputs
+int in_photoPin   = A0;       // Analog input of photoresistor measurements
+int in_SolarCell1 = A1;       // Analog input of solar cell measurements
+int in_solarCell2 = A2;       // 
+
 int servo_pos = 0;           
-int photoPin = A0;        //analog input of photoresistor measurements
-int solarCell1 = A1;      //analog input of solar cell measurements
-int solarCell2 = A2;
+
 int light;              //voltage value of photoresistor output
 int max_measurement = 0; //initial voltage value
 int opt_pos = 0;         //position of maximum voltage output
@@ -20,8 +30,8 @@ const int button2 = 4;
 
 void setup()
 {
-  servo_pr.attach(9); //photoresistor servo motor is connected to digital pin 9
-  servo_pc.attach(10); //photovoltaic cell servo motor is connected to digital pin 10
+  servo_PhotoResistor.attach(9); //photoresistor servo motor is connected to digital pin 9
+  servo_PhotovoltaicCell.attach(10); //photovoltaic cell servo motor is connected to digital pin 10
   Serial.begin(9600);
   pinMode(3, INPUT); //button1 is connected to digital pin 3
   pinMode(4, INPUT); //button2 is connected to digital pin 4
@@ -30,8 +40,8 @@ void Servo_LightScan() {
   max_measurement = 0;
   for (servo_pos = 0; servo_pos <= 180; servo_pos += 1) //motor performs 180 degrees movement
   {    
-    servo_pr.write(servo_pos);
-    light= analogRead(photoPin);           
+    servo_PhotoResistor.write(servo_pos);
+    light= analogRead(in_photoPin);           
     //delay(15);   
 
     Serial.println("Current position: ");
@@ -50,7 +60,7 @@ void Servo_LightScan() {
 }
 
 void Go_To_Opt_Pos(){
- servo_pc.write(opt_pos); //photovoltaic cell servo moves to optimal position
+ servo_PhotovoltaicCell.write(opt_pos); //photovoltaic cell servo moves to optimal position
  }
 
 
