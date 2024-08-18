@@ -74,6 +74,12 @@ void Servo_LightScan() {
 
 void Go_To_Opt_Pos(){
  servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
+ 
+  Serial.println("Optimal Position: ");
+  Serial.println(int_optimal_Servo_pos);
+  Serial.println("Maximum light measurement: ");
+  Serial.println(int_Max_PhotoResistor_Measured);
+ 
  }
 
 
@@ -100,45 +106,54 @@ void loop() {
 
   case int_State_Idle:
 
-      if ((in_b_Scan_Servo_PhotoResistor == true) && (b_Scan_Servo_PhotoResistor_Active == false)) {
-        b_Scan_Servo_PhotoResistor_Active = true;
-        b_Goto_Optimal_Servo_Pos_Active = false;
+        if ((in_b_Scan_Servo_PhotoResistor) && (int_State_Sequencer = int_State_Idle)) {
+          int_State_Sequencer = int_State_SolarScan; 
+          }
+        if (in_b_Goto_Optimal_Servo_Pos && (int_State_Sequencer = int_State_GoOptPos)) {
+          int_State_Sequencer = int_State_GoOptPos;
+        }
+      // if ((in_b_Scan_Servo_PhotoResistor == true) && (b_Scan_Servo_PhotoResistor_Active == false)) {
+      //   b_Scan_Servo_PhotoResistor_Active = true;
+      //   b_Goto_Optimal_Servo_Pos_Active = false;
    
-        } //pushing the button triggers a set of actions
+      //   } //pushing the button triggers a set of actions
 
-      if ((in_b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
-         b_Scan_Servo_PhotoResistor_Active = false;
-         b_Goto_Optimal_Servo_Pos_Active = true;
-        } 
+      // if ((in_b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
+      //    b_Scan_Servo_PhotoResistor_Active = false;
+      //    b_Goto_Optimal_Servo_Pos_Active = true;
+      //   } 
 
   case int_State_SolarScan:
     Servo_LightScan();
-    b_Scan_Servo_PhotoResistor_Active = false;
+    //int_State_Sequencer = int_State_Idle;
     break;
   case int_State_GoOptPos:
-    // do something when var equals 2
+     Go_To_Opt_Pos();
+    // int_State_Sequencer = int_State_Idle;
     break;
   default:
     // if nothing else matches, do the default
     // default is optional
+    int_State_Sequencer = int_State_Idle;
     break;
 }
 
+Serial.println(int_State_Idle);
 
- if (b_Scan_Servo_PhotoResistor_Active == true) {
-   Servo_LightScan();
-   b_Scan_Servo_PhotoResistor_Active = false; //only allows the Servo_LightScan function to run once
-  }
+//  if (b_Scan_Servo_PhotoResistor_Active == true) {
+//    Servo_LightScan();
+//    b_Scan_Servo_PhotoResistor_Active = false; //only allows the Servo_LightScan function to run once
+//   }
 
- if (b_Goto_Optimal_Servo_Pos_Active == true) {
-    Go_To_Opt_Pos();
-    Serial.println("Optimal Position: ");
-    Serial.println(int_optimal_Servo_pos);
-    Serial.println("Maximum light measurement: ");
-    Serial.println(int_Max_PhotoResistor_Measured);
+//  if (b_Goto_Optimal_Servo_Pos_Active == true) {
+//     Go_To_Opt_Pos();
+//     Serial.println("Optimal Position: ");
+//     Serial.println(int_optimal_Servo_pos);
+//     Serial.println("Maximum light measurement: ");
+//     Serial.println(int_Max_PhotoResistor_Measured);
   
-   b_Goto_Optimal_Servo_Pos_Active = false;
-  }
+//    b_Goto_Optimal_Servo_Pos_Active = false;
+//   }
  
 }
 
