@@ -34,7 +34,10 @@ bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo perfo
 const int b_Goto_Optimal_Servo_Pos  = 4; //b_Goto_Optimal_Servo_Pos is hardwared connected to digital pin 4 and is configured as digital input Read 
 bool b_Goto_Optimal_Servo_Pos_Active;    // When TRUE Servo goes to Optimal Position found during solar scan 
 
- 
+int int_State_Sequencer;
+const int int_State_Idle = 0; 
+const int int_State_SolarScan = 1; 
+const int int_State_GoOptPos = 2; 
 
 void setup()
 {
@@ -70,7 +73,7 @@ void Servo_LightScan() {
 }
 
 void Go_To_Opt_Pos(){
- servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position
+ servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
  }
 
 
@@ -80,18 +83,46 @@ void loop() {
   in_b_Scan_Servo_PhotoResistor = digitalRead(b_Scan_Servo_PhotoResistor);
   in_b_Goto_Optimal_Servo_Pos =digitalRead(b_Goto_Optimal_Servo_Pos);
 
-  if ((in_b_Scan_Servo_PhotoResistor == true) && (b_Scan_Servo_PhotoResistor_Active == false)) {
-    b_Scan_Servo_PhotoResistor_Active = true;
-    b_Goto_Optimal_Servo_Pos_Active = false;
+  // if ((in_b_Scan_Servo_PhotoResistor == true) && (b_Scan_Servo_PhotoResistor_Active == false)) {
+  //   b_Scan_Servo_PhotoResistor_Active = true;
+  //   b_Goto_Optimal_Servo_Pos_Active = false;
    
-  } //pushing the button triggers a set of actions
+  // } //pushing the button triggers a set of actions
 
-  if ((in_b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
+  // if ((in_b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
+  //   b_Scan_Servo_PhotoResistor_Active = false;
+  //   b_Goto_Optimal_Servo_Pos_Active = true;
+  // } 
+
+
+
+  switch (int_State_Sequencer) {
+
+  case int_State_Idle:
+
+      if ((in_b_Scan_Servo_PhotoResistor == true) && (b_Scan_Servo_PhotoResistor_Active == false)) {
+        b_Scan_Servo_PhotoResistor_Active = true;
+        b_Goto_Optimal_Servo_Pos_Active = false;
+   
+        } //pushing the button triggers a set of actions
+
+      if ((in_b_Goto_Optimal_Servo_Pos == true) && (b_Goto_Optimal_Servo_Pos_Active == false)){
+         b_Scan_Servo_PhotoResistor_Active = false;
+         b_Goto_Optimal_Servo_Pos_Active = true;
+        } 
+
+  case int_State_SolarScan:
+    Servo_LightScan();
     b_Scan_Servo_PhotoResistor_Active = false;
-    b_Goto_Optimal_Servo_Pos_Active = true;
-  } 
-
-
+    break;
+  case int_State_GoOptPos:
+    // do something when var equals 2
+    break;
+  default:
+    // if nothing else matches, do the default
+    // default is optional
+    break;
+}
 
 
  if (b_Scan_Servo_PhotoResistor_Active == true) {
