@@ -20,13 +20,9 @@ bool in_b_Goto_Optimal_Servo_Pos;   //When button 4 is pressed the Photovoltaic 
 //Internal Variables
 //==========================================================//
 
-
 int int_optimal_Servo_pos = 0;   //position of maximum (optimal) Photoresistor voltage output
-
 int int_PhotoResistor_Measured;   //Analog input of photoresistor measurements
 int int_Max_PhotoResistor_Measured = 0; //Maximum Voltage
-
-
 
 const int b_Scan_Servo_PhotoResistor = 3; // b_Scan_Servo_PhotoResistor is hardwared connected to digital pin 3 and is configured as digital input Read 
 bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo performs 180 deg solar scanning
@@ -34,12 +30,10 @@ bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo perfo
 const int b_Goto_Optimal_Servo_Pos  = 4; //b_Goto_Optimal_Servo_Pos is hardwared connected to digital pin 4 and is configured as digital input Read 
 bool b_Goto_Optimal_Servo_Pos_Active;    // When TRUE Servo goes to Optimal Position found during solar scan 
 
-
 const int int_State_Idle = 10; 
 const int int_State_SolarScan = 20; 
 const int int_State_GoOptPos = 30; 
 int int_State_Sequencer = int_State_Idle;
-
 
 void setup()
 {
@@ -49,6 +43,7 @@ void setup()
   pinMode(3, INPUT); //b_Scan_Servo_PhotoResistor is connected to digital pin 3 and is configured as digital input Read 
   pinMode(4, INPUT); //button2 is connected to digital pin 4
 }
+
 void Servo_LightScan() {
   int_Max_PhotoResistor_Measured = 0;
   int int_servo_pos;
@@ -65,38 +60,31 @@ void Servo_LightScan() {
     Serial.println("Current light: ");    
     Serial.println(int_PhotoResistor_Measured);  
    
-   
-    
    if (int_PhotoResistor_Measured > int_Max_PhotoResistor_Measured) {
-    int_Max_PhotoResistor_Measured = int_PhotoResistor_Measured;
-    int_optimal_Servo_pos = int_servo_pos; //assignment of maximum light measurement and optimal position values during servo motion
-   }  
-  
-  
+      int_Max_PhotoResistor_Measured = int_PhotoResistor_Measured;
+      int_optimal_Servo_pos = int_servo_pos; //assignment of maximum light measurement and optimal position values during servo motion
+      }  
   }
 }
 
 void Go_To_Opt_Pos(){
- servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
+  servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
  
   Serial.println("Optimal Position: ");
   Serial.println(int_optimal_Servo_pos);
   Serial.println("Maximum light measurement: ");
   Serial.println(int_Max_PhotoResistor_Measured);
- 
  }
-
-
 
 void loop() {
 
   in_b_Scan_Servo_PhotoResistor = digitalRead(b_Scan_Servo_PhotoResistor);
   in_b_Goto_Optimal_Servo_Pos =digitalRead(b_Goto_Optimal_Servo_Pos);
 
-
   Serial.println("State: ");
   Serial.println(int_State_Sequencer);
   Serial.println(in_b_Scan_Servo_PhotoResistor);
+
   switch (int_State_Sequencer) {
 
   case int_State_Idle:
@@ -107,28 +95,22 @@ void loop() {
         if ((in_b_Goto_Optimal_Servo_Pos) && (int_State_Sequencer == int_State_Idle)) {
           int_State_Sequencer = int_State_GoOptPos;
         }
-
-    break;
+        break;
 
   case int_State_SolarScan:
-    Servo_LightScan();
-    int_State_Sequencer = int_State_Idle;
-    break;
+        Servo_LightScan();
+        int_State_Sequencer = int_State_Idle;
+        break;
 
   case int_State_GoOptPos:
-    Go_To_Opt_Pos();
-    int_State_Sequencer = int_State_Idle;
-    break;
-    
+        Go_To_Opt_Pos();
+        int_State_Sequencer = int_State_Idle;
+        break;
+
   //default:
     // if nothing else matches, do the default
     // default is optional
-  
-}
-
-
-
- 
+  }
 }
 
 
