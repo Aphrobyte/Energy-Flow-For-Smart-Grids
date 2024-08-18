@@ -125,11 +125,11 @@ void loop() {
 
   case int_State_SolarScan:
     Servo_LightScan();
-    //int_State_Sequencer = int_State_Idle;
+    int_State_Sequencer = int_State_Idle;
     break;
   case int_State_GoOptPos:
-     Go_To_Opt_Pos();
-    // int_State_Sequencer = int_State_Idle;
+    Go_To_Opt_Pos();
+    int_State_Sequencer = int_State_Idle;
     break;
   default:
     // if nothing else matches, do the default
