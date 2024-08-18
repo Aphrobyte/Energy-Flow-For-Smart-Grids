@@ -35,6 +35,14 @@ const int int_State_SolarScan = 20;
 const int int_State_GoOptPos = 30; 
 int int_State_Sequencer = int_State_Idle;
 
+int ledState = LOW;             // ledState used to set the LED
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// the follow variables is a long because the time, measured in miliseconds,
+// will quickly become a bigger number than can be stored in an int.
+unsigned long interval = 5000UL;       
+
+
 void setup()
 {
   servo_PhotoResistor.attach(9);     //photoresistor servo motor is connected to digital pin 9
@@ -76,14 +84,33 @@ void Go_To_Opt_Pos(){
   Serial.println(int_Max_PhotoResistor_Measured);
  }
 
+ 
+
 void loop() {
 
   in_b_Scan_Servo_PhotoResistor = digitalRead(b_Scan_Servo_PhotoResistor);
-  in_b_Goto_Optimal_Servo_Pos =digitalRead(b_Goto_Optimal_Servo_Pos);
+  in_b_Goto_Optimal_Servo_Pos = digitalRead(b_Goto_Optimal_Servo_Pos);
 
-  Serial.println("State: ");
-  Serial.println(int_State_Sequencer);
-  Serial.println(in_b_Scan_Servo_PhotoResistor);
+    if (millis() - previousMillis > interval) 
+  {
+    // save the last time you blinked the LED
+    previousMillis += interval;  
+
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW)
+    {
+      ledState = HIGH;
+    }
+    else
+    {
+      ledState = LOW;
+    }
+
+  }
+
+
+Serial.println(millis() - previousMillis);
+Serial.println(ledState);
 
   switch (int_State_Sequencer) {
 
