@@ -31,8 +31,7 @@ bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo perfo
 const int b_Goto_Optimal_Servo_Pos  = 4; //b_Goto_Optimal_Servo_Pos is hardware connected to Arduino digital pin 4 and is configured as digital input Read 
 bool b_Goto_Optimal_Servo_Pos_Active;    // When TRUE Servo goes to Optimal Position found during solar scan 
 
-const int b_AutoMode = 2;                //b_Auto_mode is hardware connected to Arduino digital pin 2 and is configured as digital input Read
-bool b_Auto_Mode;                        // When TRUE SolarScan, PhotovoltaicGoToOps Pos sequence runs in AUTO
+const int b_Manual_Mode = 2;                //b_Auto_mode is hardware connected to Arduino digital pin 2 and is configured as digital input Read
 
 const int int_State_Idle = 10; 
 const int int_State_SolarScan = 20; 
@@ -96,7 +95,7 @@ void loop() {
 
   in_b_Scan_Servo_PhotoResistor = digitalRead(b_Scan_Servo_PhotoResistor);
   in_b_Goto_Optimal_Servo_Pos = digitalRead(b_Goto_Optimal_Servo_Pos);
-  in_b_Auto_Mode = digitalRead(b_Auto_Mode);
+  in_b_Auto_Mode = !digitalRead(b_Manual_Mode);
 
     if (millis() - previousMillis > interval) 
   {
@@ -116,8 +115,8 @@ void loop() {
   }
 
 
-Serial.println(millis() - previousMillis);
-Serial.println(ledState);
+//Serial.println(millis() - previousMillis);
+//Serial.println(ledState);
 Serial.println(in_b_Auto_Mode);
 
 
