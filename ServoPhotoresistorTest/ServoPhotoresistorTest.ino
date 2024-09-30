@@ -65,7 +65,7 @@ void Servo_LightScan() {
   {    
     servo_PhotoResistor.write(int_servo_pos);
     int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);           
-    delay(30);   
+    delay(200);   
 
     Serial.println("Current position: ");
     Serial.println(int_servo_pos);
@@ -81,6 +81,7 @@ void Servo_LightScan() {
 }
 
 void Go_To_Opt_Pos(){
+  //int_optimal_Servo_pos = 0;
   servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
  
   Serial.println("Optimal Position: ");
@@ -117,7 +118,11 @@ void loop() {
 
 //Serial.println(millis() - previousMillis);
 //Serial.println(ledState);
-Serial.println(in_b_Auto_Mode);
+//Serial.println(in_b_Auto_Mode);
+
+
+int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
+Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos));
 
 
   switch (int_State_Sequencer) {
