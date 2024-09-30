@@ -61,11 +61,11 @@ void Servo_LightScan() {
   int_Max_PhotoResistor_Measured = 0;
   int int_servo_pos;
 
-  for (int_servo_pos = 0; int_servo_pos <= 180; int_servo_pos += 1) //motor performs 180 degrees movement
+  for (int_servo_pos = 30; int_servo_pos <= 150; int_servo_pos += 1) //motor performs 180 degrees movement
   {    
     servo_PhotoResistor.write(int_servo_pos);
     int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);           
-    delay(200);   
+    delay(100);   
 
     Serial.println("Current position: ");
     Serial.println(int_servo_pos);
@@ -81,7 +81,7 @@ void Servo_LightScan() {
 }
 
 void Go_To_Opt_Pos(){
-  //int_optimal_Servo_pos = 0;
+ // int_optimal_Servo_pos = 90;
   servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
  
   Serial.println("Optimal Position: ");
