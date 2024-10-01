@@ -43,7 +43,7 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 
 // the follow variables is a long because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
-unsigned long interval = 60000UL;     //Every minute  
+unsigned long interval = 30000UL;     //Every minute  
 
 bool Timer_Trigger_Auto_Sequence; // When mode is in AUTO and timer period is elapsed the solar scanning sequence is triggered 
 
