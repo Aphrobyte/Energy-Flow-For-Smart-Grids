@@ -45,6 +45,12 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 // will quickly become a bigger number than can be stored in an int.
 unsigned long interval = 60000UL;     //Every minute  
 
+bool Timer_Trigger_Auto_Sequence; // When mode is in AUTO and timer period is elapsed the solar scanning sequence is triggered 
+
+bool b_State_SolarScan_Auto; //When TRUE and Mode is AUTO Servo_LightScan() is being executed 
+bool b_State_GoOptPos_Auto; //When TRUE and Mode is AUTO Go_To_Opt_Pos() is being executed
+bool b_State_Idle_Auto;     //When TRUE and Mode is AUTO State_Sequencer goes to State_Idle state
+
 
 void setup()
 {
@@ -98,8 +104,14 @@ void loop() {
   in_b_Goto_Optimal_Servo_Pos = digitalRead(b_Goto_Optimal_Servo_Pos);
   in_b_Auto_Mode = !digitalRead(b_Manual_Mode);
 
+  if (!in_b_Auto_Mode) {
+    Timer_Trigger_Auto_Sequence = LOW;
+  }
     if (millis() - previousMillis > interval) 
   {
+
+     
+    Timer_Trigger_Auto_Sequence = in_b_Auto_Mode;
     // save the last time you blinked the LED
     previousMillis += interval;  
 
@@ -116,34 +128,37 @@ void loop() {
   }
 
 
-//Serial.println(millis() - previousMillis);
-//Serial.println(ledState);
-//Serial.println(in_b_Auto_Mode);
 
 
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", State: " + String(ledState));
+Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", State: " + String(Timer_Trigger_Auto_Sequence));
 
 
   switch (int_State_Sequencer) {
 
   case int_State_Idle:
 
-        if ((in_b_Scan_Servo_PhotoResistor) && (int_State_Sequencer == int_State_Idle)) {
+        if (((in_b_Scan_Servo_PhotoResistor) && (int_State_Sequencer == int_State_Idle) && (!in_b_Auto_Mode) ) ||   ( in_b_Auto_Mode && Timer_Trigger_Auto_Sequence   ) ){
           int_State_Sequencer = int_State_SolarScan; 
           }
-        if ((in_b_Goto_Optimal_Servo_Pos) && (int_State_Sequencer == int_State_Idle)) {
+        if ((in_b_Goto_Optimal_Servo_Pos) && (int_State_Sequencer == int_State_Idle) && (!in_b_Auto_Mode)) {
           int_State_Sequencer = int_State_GoOptPos;
         }
         break;
 
   case int_State_SolarScan:
         Servo_LightScan();
-        int_State_Sequencer = int_State_Idle;
+
+        if (Timer_Trigger_Auto_Sequence) { 
+           int_State_Sequencer = int_State_GoOptPos;
+        }
+        else {
+          int_State_Sequencer = int_State_Idle;}
         break;
 
   case int_State_GoOptPos:
         Go_To_Opt_Pos();
+        Timer_Trigger_Auto_Sequence = LOW;
         int_State_Sequencer = int_State_Idle;
         break;
 
