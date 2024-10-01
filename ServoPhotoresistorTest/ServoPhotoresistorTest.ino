@@ -43,7 +43,7 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 
 // the follow variables is a long because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
-unsigned long interval = 5000UL;       
+unsigned long interval = 60000UL;     //Every minute  
 
 
 void setup()
@@ -122,7 +122,7 @@ void loop() {
 
 
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos));
+Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", State: " + String(ledState));
 
 
   switch (int_State_Sequencer) {
