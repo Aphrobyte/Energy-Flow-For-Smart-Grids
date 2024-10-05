@@ -12,6 +12,8 @@ Servo servo_PhotovoltaicCell;  //Photovoltaic cell servo motors
 
 //Analog Inputs
 int in_int_PhotoResistor_Measured   = A0;   // Analog input of photoresistor measurements reading from pin A0
+int in_int_Battery_A_Voltage        = A1;   // Analog input of Battery A
+int in_int_Battery_B_Voltage        = A2;   // Analog input of Battery B
 
 //Boolean Inputs
 bool in_b_Scan_Servo_PhotoResistor; //When button 3 is pressed the PhotoResistor Servo to perform 180 degrees solar scan  
@@ -25,6 +27,9 @@ int int_optimal_Servo_pos = 0;   //position of maximum (optimal) Photoresistor v
 int int_PhotoResistor_Measured;   //Analog input of photoresistor measurements
 int int_Max_PhotoResistor_Measured = 0; //Maximum Voltage
 
+int int_Battery_A_Voltage;
+int int_Battery_B_Voltage;
+
 const int b_Scan_Servo_PhotoResistor = 3; // b_Scan_Servo_PhotoResistor is hardware connected to Arduino digital pin 3 and is configured as digital input Read 
 bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo performs 180 deg solar scanning
 
@@ -32,6 +37,9 @@ const int b_Goto_Optimal_Servo_Pos  = 4; //b_Goto_Optimal_Servo_Pos is hardware 
 bool b_Goto_Optimal_Servo_Pos_Active;    // When TRUE Servo goes to Optimal Position found during solar scan 
 
 const int b_Manual_Mode = 2;                //b_Auto_mode is hardware connected to Arduino digital pin 2 and is configured as digital input Read
+const int b_RelayPin_A  = 5;      //Relay A Output
+const int b_RelayPin_B  = 6;      //Relay B Output
+
 
 const int int_State_Idle = 10; 
 const int int_State_SolarScan = 20; 
@@ -61,6 +69,8 @@ void setup()
   pinMode(2, INPUT); //b_Scan_Servo_PhotoResistor is connected to digital pin 3 and is configured as digital input Read 
   pinMode(3, INPUT); //b_Scan_Servo_PhotoResistor is connected to digital pin 3 and is configured as digital input Read 
   pinMode(4, INPUT); //button2 is connected to digital pin 4
+  pinMode(5, OUTPUT); //Digital Output to Relay A
+  pinMode(6, OUTPUT); //Digital Output to Relay B
 }
 
 void Servo_LightScan() {
@@ -96,13 +106,33 @@ void Go_To_Opt_Pos(){
   Serial.println(int_Max_PhotoResistor_Measured);
  }
 
- 
+ void Relay() {
+  int_Battery_A_Voltage = analogRead(in_int_Battery_A_Voltage);
+  int_Battery_B_Voltage = analogRead(in_int_Battery_B_Voltage);
+
+  if (int_Battery_A_Voltage > int_Battery_B_Voltage +0.1)
+    {  
+        digitalWrite(b_RelayPin_A, LOW);
+        digitalWrite(b_RelayPin_B, HIGH);
+    }
+  
+  else if (int_Battery_B_Voltage > int_Battery_A_Voltage +0.1)
+    {
+        digitalWrite(b_RelayPin_A, HIGH);
+        digitalWrite(b_RelayPin_B, LOW);
+    }
+ }
 
 void loop() {
+
+  Relay();
+
 
   in_b_Scan_Servo_PhotoResistor = digitalRead(b_Scan_Servo_PhotoResistor);
   in_b_Goto_Optimal_Servo_Pos = digitalRead(b_Goto_Optimal_Servo_Pos);
   in_b_Auto_Mode = !digitalRead(b_Manual_Mode);
+
+  
 
   if (!in_b_Auto_Mode) {
     Timer_Trigger_Auto_Sequence = LOW;
@@ -131,7 +161,7 @@ void loop() {
 
 
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", State: " + String(Timer_Trigger_Auto_Sequence));
+Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", State: " + String(Timer_Trigger_Auto_Sequence) + ", Battery A Voltage:" + String(int_Battery_A_Voltage) +  ", Battery B Voltage:" + String(int_Battery_B_Voltage));
 
 
   switch (int_State_Sequencer) {
