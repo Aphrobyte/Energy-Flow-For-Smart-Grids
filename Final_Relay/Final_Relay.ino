@@ -17,8 +17,8 @@ void setup() {
 }
 
 void loop() {
- int bVoltage1=analogRead(battery1);
- int bVoltage2=analogRead(battery2);
+ float bVoltage1=analogToVoltage(analogRead(battery1));
+ float bVoltage2=analogToVoltage(analogRead(battery2));
 
  if (bVoltage1 >= bVoltage2)
  {digitalWrite(relayPin1, LOW);
@@ -31,11 +31,11 @@ void loop() {
  digitalWrite(relayPin2, LOW);
 }
 
-Serial.print("Voltage of battery 1= ");
-Serial.println(analogToVoltage(bVoltage1));
+Serial.print("Voltage of battery 1= " + String(bVoltage1)+ "  ");
 
-Serial.print("Voltage of battery 2= ");
-Serial.println(analogToVoltage(bVoltage2));
+
+Serial.print("Voltage of battery 2= " + String(bVoltage2)+ "  ");
+
 
 delay(1000);
 }

@@ -27,8 +27,8 @@ int int_optimal_Servo_pos = 0;   //position of maximum (optimal) Photoresistor v
 int int_PhotoResistor_Measured;   //Analog input of photoresistor measurements
 int int_Max_PhotoResistor_Measured = 0; //Maximum Voltage
 
-int int_Battery_A_Voltage;
-int int_Battery_B_Voltage;
+float r_Battery_A_Voltage;
+float r_Battery_B_Voltage;
 
 const int b_Scan_Servo_PhotoResistor = 3; // b_Scan_Servo_PhotoResistor is hardware connected to Arduino digital pin 3 and is configured as digital input Read 
 bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo performs 180 deg solar scanning
@@ -107,21 +107,31 @@ void Go_To_Opt_Pos(){
  }
 
  void Relay() {
-  int_Battery_A_Voltage = analogRead(in_int_Battery_A_Voltage);
-  int_Battery_B_Voltage = analogRead(in_int_Battery_B_Voltage);
 
-  if (int_Battery_A_Voltage > int_Battery_B_Voltage +0.1)
+  r_Battery_A_Voltage = analogToVoltage(analogRead(in_int_Battery_A_Voltage));
+  r_Battery_B_Voltage = analogToVoltage(analogRead(in_int_Battery_B_Voltage));
+
+  
+
+  if (r_Battery_A_Voltage > r_Battery_B_Voltage +0.1)
     {  
         digitalWrite(b_RelayPin_A, LOW);
         digitalWrite(b_RelayPin_B, HIGH);
     }
   
-  else if (int_Battery_B_Voltage > int_Battery_A_Voltage +0.1)
+  else if (r_Battery_B_Voltage > r_Battery_A_Voltage +0.1)
     {
         digitalWrite(b_RelayPin_A, HIGH);
         digitalWrite(b_RelayPin_B, LOW);
     }
  }
+
+float analogToVoltage(int analogValue) {
+  const float referenceVoltage = 5.0; // Assuming 5V reference for the analog input
+  const int resolution = 1023; // 10-bit ADC gives a value from 0 to 1023
+  return (analogValue / float(resolution)) * referenceVoltage;
+}
+
 
 void loop() {
 
@@ -161,8 +171,7 @@ void loop() {
 
 
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", Auto Seq Active: " + String(Timer_Trigger_Auto_Sequence) + ", Battery A Voltage:" + String(int_Battery_A_Voltage) +  ", Battery B Voltage:" + String(int_Battery_B_Voltage));
-
+Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Battery A Voltage:" + String(r_Battery_A_Voltage) +  ", Battery B Voltage:" + String(r_Battery_B_Voltage));
 
   switch (int_State_Sequencer) {
 
