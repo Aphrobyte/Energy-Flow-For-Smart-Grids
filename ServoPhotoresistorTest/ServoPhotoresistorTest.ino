@@ -161,7 +161,7 @@ void loop() {
 
 
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", State: " + String(Timer_Trigger_Auto_Sequence) + ", Battery A Voltage:" + String(int_Battery_A_Voltage) +  ", Battery B Voltage:" + String(int_Battery_B_Voltage));
+Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Auto Mode:"+ String(in_b_Auto_Mode) +  ", Auto Seq Active: " + String(Timer_Trigger_Auto_Sequence) + ", Battery A Voltage:" + String(int_Battery_A_Voltage) +  ", Battery B Voltage:" + String(int_Battery_B_Voltage));
 
 
   switch (int_State_Sequencer) {

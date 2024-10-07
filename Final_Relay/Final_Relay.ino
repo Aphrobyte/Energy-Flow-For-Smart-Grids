@@ -1,7 +1,14 @@
-const int relayPin1 = 2;
-const int relayPin2 = 3;
-const int battery1 = A0;
-const int battery2 = A1;
+const int relayPin1 = 5;
+const int relayPin2 = 6;
+const int battery1 = A1;
+const int battery2 = A2;
+
+float analogToVoltage(int analogValue) {
+  const float referenceVoltage = 5.0; // Assuming 5V reference for the analog input
+  const int resolution = 1023; // 10-bit ADC gives a value from 0 to 1023
+  return (analogValue / float(resolution)) * referenceVoltage;
+}
+
 
 void setup() {
  Serial.begin(9600);
@@ -25,10 +32,10 @@ void loop() {
 }
 
 Serial.print("Voltage of battery 1= ");
-Serial.println(bVoltage1);
+Serial.println(analogToVoltage(bVoltage1));
 
 Serial.print("Voltage of battery 2= ");
-Serial.println(bVoltage2);
+Serial.println(analogToVoltage(bVoltage2));
 
 delay(1000);
 }
