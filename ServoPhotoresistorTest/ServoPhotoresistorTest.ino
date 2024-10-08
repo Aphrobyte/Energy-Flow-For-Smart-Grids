@@ -12,8 +12,9 @@ Servo servo_PhotovoltaicCell;  //Photovoltaic cell servo motors
 
 //Analog Inputs
 int in_int_PhotoResistor_Measured   = A0;   // Analog input of photoresistor measurements reading from pin A0
-int in_int_Battery_A_Voltage        = A1;   // Analog input of Battery A
-int in_int_Battery_B_Voltage        = A2;   // Analog input of Battery B
+int in_int_Photovoltaic_Votalge     = A1;   // Analog input of Photovoltaic voltage
+int in_int_Battery_A_Voltage        = A2;   // Analog input of Battery A
+int in_int_Battery_B_Voltage        = A4;   // Analog input of Battery B
 
 //Boolean Inputs
 bool in_b_Scan_Servo_PhotoResistor; //When button 3 is pressed the PhotoResistor Servo to perform 180 degrees solar scan  
@@ -23,12 +24,14 @@ bool in_b_Auto_Mode;                 //When switch is set to TRUE (AutoMode) Seq
 //Internal Variables
 //==========================================================//
 
+
 int int_optimal_Servo_pos = 0;   //position of maximum (optimal) Photoresistor voltage output
 int int_PhotoResistor_Measured;   //Analog input of photoresistor measurements
 int int_Max_PhotoResistor_Measured = 0; //Maximum Voltage
 
 float r_Battery_A_Voltage;
 float r_Battery_B_Voltage;
+float r_Photovoltaic_Voltage;
 
 const int b_Scan_Servo_PhotoResistor = 3; // b_Scan_Servo_PhotoResistor is hardware connected to Arduino digital pin 3 and is configured as digital input Read 
 bool b_Scan_Servo_PhotoResistor_Active;   // When TRUE Photoresistor Servo performs 180 deg solar scanning
@@ -111,6 +114,7 @@ void Go_To_Opt_Pos(){
   r_Battery_A_Voltage = analogToVoltage(analogRead(in_int_Battery_A_Voltage));
   r_Battery_B_Voltage = analogToVoltage(analogRead(in_int_Battery_B_Voltage));
 
+  r_Photovoltaic_Voltage = analogToVoltage(analogRead(in_int_Photovoltaic_Votalge));
   
 
   if (r_Battery_A_Voltage > r_Battery_B_Voltage +0.1)
@@ -127,9 +131,9 @@ void Go_To_Opt_Pos(){
  }
 
 float analogToVoltage(int analogValue) {
-  const float referenceVoltage = 5.0; // Assuming 5V reference for the analog input
+  const float referenceVoltage = 3.7; // Assuming 3.7V battery  voltage
   const int resolution = 1023; // 10-bit ADC gives a value from 0 to 1023
-  return (analogValue / float(resolution)) * referenceVoltage;
+  return (analogValue / float(resolution)) * referenceVoltage + 0.3;
 }
 
 
@@ -171,7 +175,7 @@ void loop() {
 
 
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sensor Val: "  + String(int_PhotoResistor_Measured) + ", Max Sensor Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Battery A Voltage:" + String(r_Battery_A_Voltage) +  ", Battery B Voltage:" + String(r_Battery_B_Voltage));
+Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) + ", Max Sens Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Battery A Volt:" + String(r_Battery_A_Voltage) +  ", Battery B Volt:" + String(r_Battery_B_Voltage) + ", PhotoVolt Volt: "  +  String(r_Photovoltaic_Voltage));
 
   switch (int_State_Sequencer) {
 
