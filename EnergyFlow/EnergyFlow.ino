@@ -11,17 +11,20 @@ Servo servo_PhotoResistor;     //Photoresistor servo motor
 Servo servo_PhotovoltaicCell;  //Photovoltaic cell servo motor
 
 //Analog Inputs
-const int in_int_PhotoResistor_Measured   = A0;   // Analog input of photoresistor measurements reading from pin A0
-const int in_int_Photovoltaic_Voltage     = A1;   // Analog input of Photovoltaic voltage
-const int in_int_Battery_A_Voltage        = A2;   // Analog input of Battery A
-const int in_int_Battery_B_Voltage        = A4;   // Analog input of Battery B
+const int in_int_PhotoResistor_Measured          = A0;   // Analog input of photoresistor measurements reading from pin A0
+const int in_int_Photovoltaic_Voltage_Opt        = A1;   // Analog input of Photovoltaic voltage (Optimal Positioned due to SolarScan)
+const int in_int_Photovoltaic_Voltage_Stationary = A2;   // Analog input of Photovoltaic voltage (Stationary Positioned)
+const int in_int_Battery_A_Voltage               = A3;   // Analog input of Battery A
+const int in_int_Battery_B_Voltage               = A4;   // Analog input of Battery B
 
 //Boolean Inputs
-const int in_int_Manual_Mode = 2;               // b_Auto_mode is hardware connected to Arduino digital pin 2 and is configured as digital input Read
-const int in_int_Scan_Servo_PhotoResistor = 3;  // b_Scan_Servo_PhotoResistor is hardware connected to Arduino digital pin 3 and is configured as digital input Read 
-const int in_int_Goto_Optimal_Servo_Pos  = 4;   // b_Goto_Optimal_Servo_Pos is hardware connected to Arduino digital pin 4 and is configured as digital input Read 
-const int in_int_RelayPin_A  = 5;               // Relay A Output
-const int in_int_RelayPin_B  = 6;               // Relay B Output
+const int in_int_Manual_Mode = 2;               // when TRUE (toggle switch) variable SolarScan sequence runs in MANUAL (b_Auto_mode is FALSE) 
+const int in_int_Scan_Servo_PhotoResistor = 3;  // when TRUE (push button) b_Scan_Servo_PhotoResistor is TRUE and SolarScan is performed when SolarScan sequence is in MANUAL (used for Testing)
+const int in_int_Goto_Optimal_Servo_Pos  = 4;   // when TRUE (push button) b_Goto_Optimal_Servo_Pos is TRUE and Photoresistor Servo goes to Optimal Position when SolarScan sequence is in MANUAL (used for Testing)
+
+//Boolean Outputs
+const int out_int_RelayPin_A  = 5;               // Relay A Output
+const int out_int_RelayPin_B  = 6;               // Relay B Output
 
 
 
@@ -41,7 +44,8 @@ bool b_Auto_Mode;                 //When switch is set to TRUE (AutoMode) Sequen
 
 float r_Battery_A_Voltage;         
 float r_Battery_B_Voltage;
-float r_Photovoltaic_Voltage;
+float r_Photovoltaic_Voltage_Opt; // Decimal value of Photovoltaic Voltage (Opt)
+float r_Photovoltaic_Voltage_Stationary; // Decimal value of Photovoltaic Voltage (Stationary)
 
 
 
@@ -66,15 +70,16 @@ bool b_State_Idle_Auto;     //When TRUE and Mode is AUTO State_Sequencer goes to
 
 void setup()
 {
-  servo_PhotoResistor.attach(9);     //photoresistor servo motor is connected to digital pin 9
-  servo_PhotovoltaicCell.attach(10); //photovoltaic cell servo motor is connected to digital pin 10
-  Serial.begin(9600);
+  Serial.begin(9600); // Specifies serial comm baud rate i.e. 9600 bits are sent or received per second
 
   pinMode(2, INPUT); //Solar Scan Sequence Mode (AUTO if HIGH, MANUAL if LOW)
   pinMode(3, INPUT); //When Pressed and Solar Scan Sequence is MANUAL it perform SolarScanning
   pinMode(4, INPUT); //When Pressed and Solar Scan Sequence is MANUAL Servo goes to Optimal Position (found during SolarScanning)
   pinMode(5, OUTPUT); //Digital Output to Relay A
   pinMode(6, OUTPUT); //Digital Output to Relay B
+  
+  servo_PhotoResistor.attach(9);     //photoresistor servo motor is connected to digital pin 9
+  servo_PhotovoltaicCell.attach(10); //photovoltaic cell servo motor is connected to digital pin 10
 }
 
 void Servo_LightScan() {
@@ -95,32 +100,31 @@ void Servo_LightScan() {
 }
 
 void Go_To_Opt_Pos(){
- // int_optimal_Servo_pos = 90;
   servo_PhotovoltaicCell.write(int_optimal_Servo_pos); //photovoltaic cell servo moves to optimal position found during solar scan
  }
 
  void Relay() {
 
-  r_Battery_A_Voltage = analogToVoltage(analogRead(in_int_Battery_A_Voltage));
-  r_Battery_B_Voltage = analogToVoltage(analogRead(in_int_Battery_B_Voltage));
+  r_Battery_A_Voltage = AnalogToVoltage(analogRead(in_int_Battery_A_Voltage));
+  r_Battery_B_Voltage = AnalogToVoltage(analogRead(in_int_Battery_B_Voltage));
 
-  r_Photovoltaic_Voltage = analogToVoltage(analogRead(in_int_Photovoltaic_Voltage));
-  
+  r_Photovoltaic_Voltage_Opt = AnalogToVoltage(analogRead(in_int_Photovoltaic_Voltage_Opt));
+  r_Photovoltaic_Voltage_Stationary = AnalogToVoltage(analogRead(in_int_Photovoltaic_Voltage_Stationary));
 
   if (r_Battery_A_Voltage > r_Battery_B_Voltage +0.1)
     {  
-        digitalWrite(in_int_RelayPin_A, LOW);
-        digitalWrite(in_int_RelayPin_B, HIGH);
+        digitalWrite(out_int_RelayPin_A, LOW);
+        digitalWrite(out_int_RelayPin_B, HIGH);
     }
   
   else if (r_Battery_B_Voltage > r_Battery_A_Voltage +0.1)
     {
-        digitalWrite(in_int_RelayPin_A, HIGH);
-        digitalWrite(in_int_RelayPin_B, LOW);
+        digitalWrite(out_int_RelayPin_A, HIGH);
+        digitalWrite(out_int_RelayPin_B, LOW);
     }
  }
 
-float analogToVoltage(int analogValue) {
+float AnalogToVoltage(int analogValue) {
   const float referenceVoltage = 3.7; // Assuming 3.7V battery  voltage
   const int resolution = 1023; // 10-bit ADC gives a value from 0 to 1023
   return (analogValue / float(resolution)) * referenceVoltage + 0.3;
@@ -131,30 +135,22 @@ void loop() {
 
   Relay();
 
-
   b_Scan_Servo_PhotoResistor = digitalRead(in_int_Scan_Servo_PhotoResistor);
   b_Goto_Optimal_Servo_Pos = digitalRead(in_int_Goto_Optimal_Servo_Pos);
   b_Auto_Mode = !digitalRead(in_int_Manual_Mode);
-
-  
 
   if (!b_Auto_Mode) {
     Timer_Trigger_Auto_Sequence = LOW;
   }
     if (millis() - previousMillis > t_TimerInterval) 
   {
-
     Timer_Trigger_Auto_Sequence = b_Auto_Mode;
-    // save the last time you blinked the LED
     previousMillis += t_TimerInterval;  
-
   }
 
 
-
-
 int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) + ", Max Sens Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Battery A Volt:" + String(r_Battery_A_Voltage) +  ", Battery B Volt:" + String(r_Battery_B_Voltage) + ", PhotoVolt Volt: "  +  String(r_Photovoltaic_Voltage));
+Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) + ", Max Sens Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Battery A Volt:" + String(r_Battery_A_Voltage) +  ", Battery B Volt:" + String(r_Battery_B_Voltage) + ", PhotoVolt Volt (Opt): "  +  String(r_Photovoltaic_Voltage_Opt) + ", PhotoVolt Volt (Stat): "  +  String(r_Photovoltaic_Voltage_Stationary));
 
   switch (int_State_Sequencer) {
 
