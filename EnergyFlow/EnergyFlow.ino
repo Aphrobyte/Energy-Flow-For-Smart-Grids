@@ -46,8 +46,8 @@ bool b_Auto_Mode;                 //When switch is set to TRUE (AutoMode) Sequen
 
 float r_Battery_A_Voltage;         
 float r_Battery_B_Voltage;
-float r_Battery_A_SOC;         
-float r_Battery_B_SOC;
+float r_Battery_A_SoC;         
+float r_Battery_B_SoC;
 float r_Photovoltaic_Voltage_Opt; // Decimal value of Photovoltaic Voltage (Opt)
 float r_Photovoltaic_Voltage_Stationary; // Decimal value of Photovoltaic Voltage (Stationary)
 
@@ -112,23 +112,33 @@ void Go_To_Opt_Pos(){
   r_Battery_A_Voltage = AnalogToVoltage(analogRead(in_int_Battery_A_Voltage));
   r_Battery_B_Voltage = AnalogToVoltage(analogRead(in_int_Battery_B_Voltage));
 
-  r_Battery_A_SOC = SOC(r_Battery_A_Voltage);
-  r_Battery_B_SOC = SOC(r_Battery_B_Voltage);
+  r_Battery_A_SoC = SoC(r_Battery_A_Voltage);
+  r_Battery_B_SoC = SoC(r_Battery_B_Voltage);
 
   r_Photovoltaic_Voltage_Opt = AnalogToVoltage(analogRead(in_int_Photovoltaic_Voltage_Opt));
   r_Photovoltaic_Voltage_Stationary = AnalogToVoltage(analogRead(in_int_Photovoltaic_Voltage_Stationary));
 
-  if (r_Battery_A_Voltage > r_Battery_B_Voltage +0.1)
+  if (r_Battery_A_SoC > 0.2)
     {  
         digitalWrite(out_int_RelayPin_A, LOW);
         digitalWrite(out_int_RelayPin_B, HIGH);
     }
   
-  else if (r_Battery_B_Voltage > r_Battery_A_Voltage +0.1)
+  else if (r_Battery_B_SoC > 0.2)
     {
         digitalWrite(out_int_RelayPin_A, HIGH);
         digitalWrite(out_int_RelayPin_B, LOW);
     }
+  else if (r_Battery_A_SoC > r_Battery_B_SoC)
+  {
+        digitalWrite(out_int_RelayPin_A, LOW);
+        digitalWrite(out_int_RelayPin_B, HIGH);
+  }
+  else 
+  {
+        digitalWrite(out_int_RelayPin_A, LOW);
+        digitalWrite(out_int_RelayPin_B, HIGH);
+  }
  }
 
  bool TimerSetAutoSequence(unsigned long t_TimerInterval, bool b_Auto_Mode ) {
@@ -148,7 +158,7 @@ float AnalogToVoltage(int analogValue) {
 }
 
 
-float SOC(float BatteryVoltage){
+float SoC(float BatteryVoltage){
       // Define the voltage levels for a typical Li-ion battery
     float fullVoltage = 4.2;    // 100% SoC
     float emptyVoltage = 3.0;   // 0% SoC
@@ -162,9 +172,9 @@ float SOC(float BatteryVoltage){
     }
 
     // Calculate the percentage SoC based on the voltage
-    float soc = (BatteryVoltage - emptyVoltage) / (fullVoltage - emptyVoltage) * 100.0;
+    float SoC = (BatteryVoltage - emptyVoltage) / (fullVoltage - emptyVoltage) * 100.0;
 
-    return soc;
+    return SoC;
 }
 
 
@@ -207,8 +217,8 @@ void SerialMonitor() {
                ", Opt Pos: " + String(int_optimal_Servo_pos) + 
                ", Battery A Volt:" + String(r_Battery_A_Voltage) +  
                ", Battery B Volt:" + String(r_Battery_B_Voltage) + 
-               ", Battery A SOC:" + String(r_Battery_A_SOC) +  
-               ", Battery B SOC:" + String(r_Battery_B_SOC) + 
+               ", Battery A SOC:" + String(r_Battery_A_SoC) +  
+               ", Battery B SOC:" + String(r_Battery_B_SoC) + 
                ", PhotoVolt Volt (Opt): "  +  String(r_Photovoltaic_Voltage_Opt) + 
                ", PhotoVolt Volt (Stat): "  +  String(r_Photovoltaic_Voltage_Stationary));
 }
