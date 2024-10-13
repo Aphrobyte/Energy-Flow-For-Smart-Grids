@@ -22,6 +22,8 @@ const int in_int_Manual_Mode = 2;               // when TRUE (toggle switch) var
 const int in_int_Scan_Servo_PhotoResistor = 3;  // when TRUE (push button) b_Scan_Servo_PhotoResistor is TRUE and SolarScan is performed when SolarScan sequence is in MANUAL (used for Testing)
 const int in_int_Goto_Optimal_Servo_Pos  = 4;   // when TRUE (push button) b_Goto_Optimal_Servo_Pos is TRUE and Photoresistor Servo goes to Optimal Position when SolarScan sequence is in MANUAL (used for Testing)
 
+//Output variables
+//==========================================================//
 //Boolean Outputs
 const int out_int_RelayPin_A  = 5;               // Relay A Output
 const int out_int_RelayPin_B  = 6;               // Relay B Output
@@ -61,7 +63,7 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 // will quickly become a bigger number than can be stored in an int.
 unsigned long t_TimerInterval = 60000UL;     //Every minute  
 
-bool Timer_Trigger_Auto_Sequence; // When mode is in AUTO and timer period is elapsed the solar scanning sequence is triggered 
+bool b_Trigger_Auto_Sequence; // When mode is in AUTO and timer period is elapsed the solar scanning sequence is triggered 
 
 bool b_State_SolarScan_Auto; //When TRUE and Mode is AUTO Servo_LightScan() is being executed 
 bool b_State_GoOptPos_Auto; //When TRUE and Mode is AUTO Go_To_Opt_Pos() is being executed
@@ -124,39 +126,50 @@ void Go_To_Opt_Pos(){
     }
  }
 
+ bool TimerSetAutoSequence(unsigned long t_TimerInterval, bool b_Auto_Mode ) {
+    if (!b_Auto_Mode) {
+      return LOW;
+     }
+    else if (millis() - previousMillis > t_TimerInterval) {
+      return HIGH;
+      previousMillis += t_TimerInterval;  
+      }
+    }
+
 float AnalogToVoltage(int analogValue) {
   const float referenceVoltage = 3.7; // Assuming 3.7V battery  voltage
   const int resolution = 1023; // 10-bit ADC gives a value from 0 to 1023
-  return (analogValue / float(resolution)) * referenceVoltage + 0.3;
+  return (analogValue / float(resolution)) * referenceVoltage;
 }
 
 
-void loop() {
+float SOC(float BatteryVoltage){
+      // Define the voltage levels for a typical Li-ion battery
+    float fullVoltage = 4.2;    // 100% SoC
+    float emptyVoltage = 3.0;   // 0% SoC
 
-  Relay();
+    // Ensure voltage stays within range to avoid SoC out of bounds
+    if (BatteryVoltage >= fullVoltage) {
+        return 100.0;  // Battery fully charged
+    }
+    if (BatteryVoltage <= emptyVoltage) {
+        return 0.0;    // Battery empty
+    }
 
-  b_Scan_Servo_PhotoResistor = digitalRead(in_int_Scan_Servo_PhotoResistor);
-  b_Goto_Optimal_Servo_Pos = digitalRead(in_int_Goto_Optimal_Servo_Pos);
-  b_Auto_Mode = !digitalRead(in_int_Manual_Mode);
+    // Calculate the percentage SoC based on the voltage
+    float soc = (BatteryVoltage - emptyVoltage) / (fullVoltage - emptyVoltage) * 100.0;
 
-  if (!b_Auto_Mode) {
-    Timer_Trigger_Auto_Sequence = LOW;
-  }
-    if (millis() - previousMillis > t_TimerInterval) 
-  {
-    Timer_Trigger_Auto_Sequence = b_Auto_Mode;
-    previousMillis += t_TimerInterval;  
-  }
+    return soc;
+}
 
 
-int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
-Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) + ", Max Sens Val: " + String(int_Max_PhotoResistor_Measured) + ", Opt Pos: " + String(int_optimal_Servo_pos) + ", Battery A Volt:" + String(r_Battery_A_Voltage) +  ", Battery B Volt:" + String(r_Battery_B_Voltage) + ", PhotoVolt Volt (Opt): "  +  String(r_Photovoltaic_Voltage_Opt) + ", PhotoVolt Volt (Stat): "  +  String(r_Photovoltaic_Voltage_Stationary));
 
-  switch (int_State_Sequencer) {
+void StateSequence() {
+    switch (int_State_Sequencer) {
 
   case int_State_Idle:
 
-        if (((b_Scan_Servo_PhotoResistor) && (int_State_Sequencer == int_State_Idle) && (!b_Auto_Mode) ) ||   ( b_Auto_Mode && Timer_Trigger_Auto_Sequence   ) ){
+        if (((b_Scan_Servo_PhotoResistor) && (int_State_Sequencer == int_State_Idle) && (!b_Auto_Mode) ) ||   ( b_Auto_Mode && b_Trigger_Auto_Sequence   ) ){
           int_State_Sequencer = int_State_SolarScan; 
           }
         if ((b_Goto_Optimal_Servo_Pos) && (int_State_Sequencer == int_State_Idle) && (!b_Auto_Mode)) {
@@ -167,7 +180,7 @@ Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) + ", Max Sens 
   case int_State_SolarScan:
         Servo_LightScan();
 
-        if (Timer_Trigger_Auto_Sequence) { 
+        if (b_Trigger_Auto_Sequence) { 
            int_State_Sequencer = int_State_GoOptPos;
         }
         else {
@@ -176,11 +189,37 @@ Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) + ", Max Sens 
 
   case int_State_GoOptPos:
         Go_To_Opt_Pos();
-        Timer_Trigger_Auto_Sequence = LOW;
+        b_Trigger_Auto_Sequence = LOW;
         int_State_Sequencer = int_State_Idle;
         break;
-
   }
+}
+
+
+void SerialMonitor() {
+  Serial.println("Sens Val: "  + String(int_PhotoResistor_Measured) +
+               ", Max Sens Val: " + String(int_Max_PhotoResistor_Measured) + 
+               ", Opt Pos: " + String(int_optimal_Servo_pos) + 
+               ", Battery A Volt:" + String(r_Battery_A_Voltage) +  
+               ", Battery B Volt:" + String(r_Battery_B_Voltage) + 
+               ", PhotoVolt Volt (Opt): "  +  String(r_Photovoltaic_Voltage_Opt) + 
+               ", PhotoVolt Volt (Stat): "  +  String(r_Photovoltaic_Voltage_Stationary));
+}
+
+void loop() {
+
+  
+  b_Trigger_Auto_Sequence = TimerSetAutoSequence(t_TimerInterval,b_Auto_Mode);
+
+  b_Scan_Servo_PhotoResistor = digitalRead(in_int_Scan_Servo_PhotoResistor);
+  b_Goto_Optimal_Servo_Pos = digitalRead(in_int_Goto_Optimal_Servo_Pos);
+  b_Auto_Mode = !digitalRead(in_int_Manual_Mode);
+  int_PhotoResistor_Measured = analogRead(in_int_PhotoResistor_Measured);     
+
+
+  SerialMonitor();
+  Relay();
+  StateSequence();
 }
 
 
