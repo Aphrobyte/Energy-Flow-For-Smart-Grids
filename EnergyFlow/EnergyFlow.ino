@@ -46,6 +46,8 @@ bool b_Auto_Mode;                 //When switch is set to TRUE (AutoMode) Sequen
 
 float r_Battery_A_Voltage;         
 float r_Battery_B_Voltage;
+float r_Battery_A_SOC;         
+float r_Battery_B_SOC;
 float r_Photovoltaic_Voltage_Opt; // Decimal value of Photovoltaic Voltage (Opt)
 float r_Photovoltaic_Voltage_Stationary; // Decimal value of Photovoltaic Voltage (Stationary)
 
@@ -109,6 +111,9 @@ void Go_To_Opt_Pos(){
 
   r_Battery_A_Voltage = AnalogToVoltage(analogRead(in_int_Battery_A_Voltage));
   r_Battery_B_Voltage = AnalogToVoltage(analogRead(in_int_Battery_B_Voltage));
+
+  r_Battery_A_SOC = SOC(r_Battery_A_Voltage);
+  r_Battery_B_SOC = SOC(r_Battery_B_Voltage);
 
   r_Photovoltaic_Voltage_Opt = AnalogToVoltage(analogRead(in_int_Photovoltaic_Voltage_Opt));
   r_Photovoltaic_Voltage_Stationary = AnalogToVoltage(analogRead(in_int_Photovoltaic_Voltage_Stationary));
@@ -202,6 +207,8 @@ void SerialMonitor() {
                ", Opt Pos: " + String(int_optimal_Servo_pos) + 
                ", Battery A Volt:" + String(r_Battery_A_Voltage) +  
                ", Battery B Volt:" + String(r_Battery_B_Voltage) + 
+               ", Battery A SOC:" + String(r_Battery_A_SOC) +  
+               ", Battery B SOC:" + String(r_Battery_B_SOC) + 
                ", PhotoVolt Volt (Opt): "  +  String(r_Photovoltaic_Voltage_Opt) + 
                ", PhotoVolt Volt (Stat): "  +  String(r_Photovoltaic_Voltage_Stationary));
 }
