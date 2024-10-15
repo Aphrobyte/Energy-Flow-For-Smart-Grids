@@ -70,6 +70,8 @@ bool b_State_SolarScan_Auto; //When TRUE and Mode is AUTO Servo_LightScan() is b
 bool b_State_GoOptPos_Auto; //When TRUE and Mode is AUTO Go_To_Opt_Pos() is being executed
 bool b_State_Idle_Auto;     //When TRUE and Mode is AUTO State_Sequencer goes to State_Idle state
 
+bool Relay_A;
+bool Relay_B;
 
 void setup()
 {
@@ -115,22 +117,30 @@ void Go_To_Opt_Pos(){
     {  
         digitalWrite(out_int_RelayPin_A, LOW);
         digitalWrite(out_int_RelayPin_B, HIGH);
+        Relay_A = LOW;
+        Relay_B = HIGH;
     }
   
   else if (r_Battery_B_SoC > 0.2)
     {
         digitalWrite(out_int_RelayPin_A, HIGH);
         digitalWrite(out_int_RelayPin_B, LOW);
+        Relay_A = HIGH;
+        Relay_B = LOW;
     }
   else if (r_Battery_A_SoC > r_Battery_B_SoC)
   {
         digitalWrite(out_int_RelayPin_A, LOW);
         digitalWrite(out_int_RelayPin_B, HIGH);
+        Relay_A = LOW;
+        Relay_B = HIGH;
   }
   else 
   {
         digitalWrite(out_int_RelayPin_A, HIGH);
         digitalWrite(out_int_RelayPin_B, LOW);
+        Relay_A = HIGH;
+        Relay_B = LOW;
   }
  }
 
@@ -213,6 +223,8 @@ void SerialMonitor() {
                ", Battery B Volt:" + String(r_Battery_B_Voltage) + 
                ", Battery A SOC:" + String(r_Battery_A_SoC) +  
                ", Battery B SOC:" + String(r_Battery_B_SoC) + 
+               ", Relay A:" + String(Relay_A) + 
+               ", Relay B:" + String(Relay_B) + 
                ", PhotoVolt Volt: "  +  String(r_Photovoltaic_Voltage)); 
 }
 
